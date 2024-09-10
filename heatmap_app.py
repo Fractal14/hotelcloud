@@ -7,7 +7,7 @@ from matplotlib.widgets import RectangleSelector
 
 # Read in Data
 pickup_data = pd.read_csv('6_pickup.csv')
-full_refundable_rates_data = pd.read_csv('data-1725876476777.csv')
+full_refundable_rates_data = pd.read_csv('full_refundables_rate_data.csv')
 bookings_forecast_data = pd.read_csv('bookings_forecast.csv')
 
 def create_normalized_heatmap(data, start_date, end_date, value_column='refundable_rate', cmap='rainbow'):
@@ -31,16 +31,7 @@ def create_normalized_heatmap(data, start_date, end_date, value_column='refundab
         print("Warning: Infinite or very large values detected in the data.")
         pivot_data = pivot_data.replace([np.inf, -np.inf], np.nan)
     
-    # Normalize the data to 0-1 range, handling potential division by zero
-    pivot_data_min = pivot_data.min().min()
-    pivot_data_max = pivot_data.max().max()
-    if pivot_data_min == pivot_data_max:
-        print("Warning: All values are the same. Cannot normalize.")
-        normalized_data = pivot_data
-    else:
-        normalized_data = (pivot_data - pivot_data_min) / (pivot_data_max - pivot_data_min)
-    
-    return normalized_data
+    return pivot_data
 
 def plot_heatmap(data, title, value_column, start_date, end_date, cmap='rainbow'):
     # Check if the data is not empty
