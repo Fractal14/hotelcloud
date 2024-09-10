@@ -107,7 +107,7 @@ full_refundable_norm = create_normalized_heatmap(full_refundable_rates_data, sta
 bookings_norm = create_normalized_heatmap(bookings_forecast_data, start_date, end_date, 'revenue', cmap)
 
 # Create tabs for each heatmap
-tab1, tab2, tab3 = st.tabs(["Pickup Data", "Mismatched Rates Data", "Full Refundable Rates Data"])
+tab1, tab2, tab3 = st.tabs(["Pickup Data", "Forecasted Revenue Data", "Full Refundable Rates Data"])
 
 # Function to handle zooming
 def zoom_factory(ax, base_scale=1.1):
