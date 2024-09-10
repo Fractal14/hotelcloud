@@ -5,12 +5,17 @@ import csv
 import numpy as np
 import streamlit as st
 import os
+from dotenv import load_dotenv
 
-host = "hotel-cloud-db-dev.cy9have47g8u.eu-west-2.rds.amazonaws.com"
-database = "hotelcloud"
-user = "hotelcloudadmin"
-password = "aX2X1i7z4CUUQihoSAdasd"
-port = "5432"  # default PostgreSQL port
+# Load environment variables from .env file
+load_dotenv()
+
+# Get database credentials from environment variables
+host = os.getenv("DB_HOST")
+database = os.getenv("DB_NAME")
+user = os.getenv("DB_USER")
+password = os.getenv("DB_PASSWORD")
+port = os.getenv("DB_PORT", "5432")  # default PostgreSQL port if not specified
 
 #Read in data from all booking.com channels with rate code FLRA1
 
