@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from matplotlib.widgets import RectangleSelector
+import matplotlib.gridspec as gridspec
 
 # Read in Data
 pickup_data = pd.read_csv('6_pickup.csv')
@@ -34,53 +35,54 @@ def create_normalized_heatmap(data, start_date, end_date, value_column='refundab
     return pivot_data
 
 def plot_heatmap(data, title, value_column, start_date, end_date, cmap='rainbow'):
-    # Check if the data is not empty
     if not data.empty:
-        # Set up the plot style
         plt.style.use('default')
         
-        # Create the figure and axes (increased figure size)
-        fig, ax = plt.subplots(figsize=(24, 20))
+        # Set up the figure with GridSpec
+        fig = plt.figure(figsize=(12, 14))  # Increased overall height
+        gs = gridspec.GridSpec(3, 1, height_ratios=[20, 1, 2], hspace=0.3)
         
-        # Create the heatmap using seaborn
-        sns.heatmap(
+        # Main heatmap
+        ax = fig.add_subplot(gs[0])
+        heatmap = sns.heatmap(
             data,
             cmap=cmap,
             annot=False,
             fmt='.2f',
-            cbar_kws={'label': f'Normalized {value_column}'},
             ax=ax,
-            mask=data.isnull()
+            mask=data.isnull(),
+            cbar=False  # Ensure no colorbar is created by seaborn
         )
         
-        # Set title and labels
         ax.set_title(f'{title}\nfor Dates from {start_date.strftime("%d/%m/%Y")} to {end_date.strftime("%d/%m/%Y")}',
-                     fontsize=24, fontweight='bold', pad=20)
-        ax.set_xlabel('Report Date', fontsize=18, labelpad=10)
-        ax.set_ylabel('Stay Date', fontsize=18, labelpad=10)
+                     fontsize=14, fontweight='bold', pad=20)
+        ax.set_xlabel('Report Date', fontsize=12, labelpad=10)
+        ax.set_ylabel('Stay Date', fontsize=12, labelpad=10)
         
-        # Calculate tick positions and labels
-        num_ticks = 15  # Increased number of ticks
+        num_ticks = 10
         tick_indices = np.linspace(0, len(data.index) - 1, num_ticks, dtype=int)
         tick_dates = [data.index[i] for i in tick_indices]
         tick_labels = [date.strftime('%d/%m/%Y') for date in tick_dates]
         
-        # Set x-axis and y-axis ticks
         ax.set_xticks(tick_indices)
-        ax.set_xticklabels(tick_labels, rotation=45, ha='right', fontsize=12)
+        ax.set_xticklabels(tick_labels, rotation=45, ha='right', fontsize=8)
         ax.set_yticks(tick_indices)
-        ax.set_yticklabels(tick_labels, fontsize=12)
+        ax.set_yticklabels(tick_labels, fontsize=8)
         
-        # Remove gridlines
         ax.grid(False)
         
-        # Adjust layout
-        plt.tight_layout()
+        # Colorbar
+        cbar_ax = fig.add_subplot(gs[2])
+        cbar = fig.colorbar(heatmap.collections[0], cax=cbar_ax, orientation='horizontal')
+        cbar.set_label(f'Normalized {value_column}', fontsize=10, labelpad=10)
+        
+        # Adjust layout without using tight_layout
+        fig.subplots_adjust(top=0.95, bottom=0.1, left=0.1, right=0.95)
         
         return fig, ax
     else:
-        print(f"No data found for dates from {start_date.strftime('%d/%m/%Y')} to {end_date.strftime('%d/%m/%Y')}.")
         return None, None
+
 
 # Streamlit app
 st.title('Heatmap Dashboard')
