@@ -118,7 +118,7 @@ def calculate_step_size(min_value, max_value):
         step_size = magnitude / 2
     else:
         step_size = magnitude
-    return step_size
+    return float(step_size)
 
 # Calculate step sizes for each dataset
 pickup_step = calculate_step_size(pickup_data['total_rooms'].min(), pickup_data['total_rooms'].max())
@@ -144,29 +144,25 @@ with col1:
     custom_range = st.checkbox("Use custom colorbar range")
     
     # Add sliders for colorbar range, only shown if custom range is enabled
-    colorbar_min = None
-    colorbar_max = None
     if custom_range:
-        # Calculate global min and max values
-        global_min = min(pickup_data['total_rooms'].min(), 
-                         bookings_forecast_data['revenue'].min(), 
-                         full_refundable_rates_data['refundable_rate'].min())
-        global_max = max(pickup_data['total_rooms'].max(), 
-                         bookings_forecast_data['revenue'].max(), 
-                         full_refundable_rates_data['refundable_rate'].max())
-        
-        st.write(f"Global range: {global_min:.2f} to {global_max:.2f}")
-        
-        colorbar_min = st.slider("Colorbar Minimum", 
-                                 min_value=float(global_min), 
-                                 max_value=float(global_max), 
-                                 value=float(global_min), 
-                                 step=0.1)
-        colorbar_max = st.slider("Colorbar Maximum", 
-                                 min_value=float(global_min), 
-                                 max_value=float(global_max), 
-                                 value=float(global_max), 
-                                 step=0.1)
+        st.write("Pickup Data Range:")
+        pickup_min, pickup_max = pickup_data['total_rooms'].min(), pickup_data['total_rooms'].max()
+        pickup_cmin = st.slider("Pickup Min", min_value=float(pickup_min), max_value=float(pickup_max), value=float(pickup_min), step=pickup_step)
+        pickup_cmax = st.slider("Pickup Max", min_value=float(pickup_min), max_value=float(pickup_max), value=float(pickup_max), step=pickup_step)
+
+        st.write("Forecasted Revenue Data Range:")
+        revenue_min, revenue_max = bookings_forecast_data['revenue'].min(), bookings_forecast_data['revenue'].max()
+        revenue_cmin = st.slider("Revenue Min", min_value=float(revenue_min), max_value=float(revenue_max), value=float(revenue_min), step=revenue_step)
+        revenue_cmax = st.slider("Revenue Max", min_value=float(revenue_min), max_value=float(revenue_max), value=float(revenue_max), step=revenue_step)
+
+        st.write("Full Refundable Rates Data Range:")
+        rate_min, rate_max = full_refundable_rates_data['refundable_rate'].min(), full_refundable_rates_data['refundable_rate'].max()
+        rate_cmin = st.slider("Rate Min", min_value=float(rate_min), max_value=float(rate_max), value=float(rate_min), step=rate_step)
+        rate_cmax = st.slider("Rate Max", min_value=float(rate_min), max_value=float(rate_max), value=float(rate_max), step=rate_step)
+    else:
+        pickup_cmin, pickup_cmax = None, None
+        revenue_cmin, revenue_cmax = None, None
+        rate_cmin, rate_cmax = None, None
 
     # Add more vertical space
     st.markdown("<br><br><br>", unsafe_allow_html=True)
@@ -176,7 +172,7 @@ prev_start_date, prev_end_date = convert_to_previous_year(start_date, end_date)
 
 # Precompute all normalized data and graphs
 @st.cache_data
-def precompute_graphs(pickup_data, full_refundable_rates_data, bookings_forecast_data, start_date, end_date, prev_start_date, prev_end_date, colorbar_min=None, colorbar_max=None):
+def precompute_graphs(pickup_data, full_refundable_rates_data, bookings_forecast_data, start_date, end_date, prev_start_date, prev_end_date, custom_range, pickup_cmin, pickup_cmax, revenue_cmin, revenue_cmax, rate_cmin, rate_cmax):
     pickup_norm = create_normalized_heatmap(pickup_data, start_date, end_date, 'total_rooms')
     pickup_norm_prev = create_normalized_heatmap(pickup_data, prev_start_date, prev_end_date, 'total_rooms')
     full_refundable_norm = create_normalized_heatmap(full_refundable_rates_data, start_date, end_date, 'refundable_rate')
@@ -184,12 +180,12 @@ def precompute_graphs(pickup_data, full_refundable_rates_data, bookings_forecast
     bookings_norm = create_normalized_heatmap(bookings_forecast_data, start_date, end_date, 'revenue')
     bookings_norm_prev = create_normalized_heatmap(bookings_forecast_data, prev_start_date, prev_end_date, 'revenue')
 
-    pickup_fig, pickup_layout = plot_heatmap_plotly(pickup_norm, 'Heatmap of Total Rooms', 'Total Rooms', start_date, end_date, colorbar_min, colorbar_max)
-    pickup_fig_prev, pickup_layout_prev = plot_heatmap_plotly(pickup_norm_prev, 'Heatmap of Total Rooms (Previous Year)', 'Total Rooms', prev_start_date, prev_end_date, colorbar_min, colorbar_max)
-    bookings_fig, bookings_layout = plot_heatmap_plotly(bookings_norm, 'Heatmap of Forecasted Revenue', 'Revenue', start_date, end_date, colorbar_min, colorbar_max)
-    bookings_fig_prev, bookings_layout_prev = plot_heatmap_plotly(bookings_norm_prev, 'Heatmap of Forecasted Revenue (Previous Year)', 'Revenue', prev_start_date, prev_end_date, colorbar_min, colorbar_max)
-    full_refundable_fig, full_refundable_layout = plot_heatmap_plotly(full_refundable_norm, 'Heatmap of Refundable Rates', 'Refundable Rate', start_date, end_date, colorbar_min, colorbar_max)
-    full_refundable_fig_prev, full_refundable_layout_prev = plot_heatmap_plotly(full_refundable_norm_prev, 'Heatmap of Refundable Rates (Previous Year)', 'Refundable Rate', prev_start_date, prev_end_date, colorbar_min, colorbar_max)
+    pickup_fig, pickup_layout = plot_heatmap_plotly(pickup_norm, 'Heatmap of Total Rooms', 'Total Rooms', start_date, end_date, pickup_cmin, pickup_cmax)
+    pickup_fig_prev, pickup_layout_prev = plot_heatmap_plotly(pickup_norm_prev, 'Heatmap of Total Rooms (Previous Year)', 'Total Rooms', prev_start_date, prev_end_date, pickup_cmin, pickup_cmax)
+    bookings_fig, bookings_layout = plot_heatmap_plotly(bookings_norm, 'Heatmap of Forecasted Revenue', 'Revenue', start_date, end_date, revenue_cmin, revenue_cmax)
+    bookings_fig_prev, bookings_layout_prev = plot_heatmap_plotly(bookings_norm_prev, 'Heatmap of Forecasted Revenue (Previous Year)', 'Revenue', prev_start_date, prev_end_date, revenue_cmin, revenue_cmax)
+    full_refundable_fig, full_refundable_layout = plot_heatmap_plotly(full_refundable_norm, 'Heatmap of Refundable Rates', 'Refundable Rate', start_date, end_date, rate_cmin, rate_cmax)
+    full_refundable_fig_prev, full_refundable_layout_prev = plot_heatmap_plotly(full_refundable_norm_prev, 'Heatmap of Refundable Rates (Previous Year)', 'Refundable Rate', prev_start_date, prev_end_date, rate_cmin, rate_cmax)
 
     return (pickup_fig, pickup_fig_prev, bookings_fig, bookings_fig_prev, full_refundable_fig, full_refundable_fig_prev,
             pickup_layout, pickup_layout_prev, bookings_layout, bookings_layout_prev, full_refundable_layout, full_refundable_layout_prev)
@@ -197,7 +193,8 @@ def precompute_graphs(pickup_data, full_refundable_rates_data, bookings_forecast
 # Unpack the returned values from precompute_graphs
 (pickup_fig, pickup_fig_prev, bookings_fig, bookings_fig_prev, full_refundable_fig, full_refundable_fig_prev,
  pickup_layout, pickup_layout_prev, bookings_layout, bookings_layout_prev, full_refundable_layout, full_refundable_layout_prev) = precompute_graphs(
-    pickup_data, full_refundable_rates_data, bookings_forecast_data, start_date, end_date, prev_start_date, prev_end_date, colorbar_min, colorbar_max
+    pickup_data, full_refundable_rates_data, bookings_forecast_data, start_date, end_date, prev_start_date, prev_end_date, 
+    custom_range, pickup_cmin, pickup_cmax, revenue_cmin, revenue_cmax, rate_cmin, rate_cmax
 )
 
 # Function to update layout while preserving zoom
