@@ -93,8 +93,8 @@ col1, col2 = st.columns([1, 3])
 
 # Add the logo to the second (narrower) column
 with col1:
-    logo = Image.open('/Users/lohithkonathala/hotelcloud/hotelcloud_logo.png')
-    st.image(logo, width=300)  # Adjust width as needed
+    logo = Image.open('hotelcloud_logo.png')
+    st.image(logo, width=300) 
 
 
 
