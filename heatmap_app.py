@@ -88,15 +88,14 @@ def plot_heatmap_plotly(data, title, value_column, start_date, end_date):
     return fig
 
 # Streamlit app
-# Create two columns
+
+
 col1, col2 = st.columns([1, 3])
 
 # Add the logo to the second (narrower) column
 with col1:
     logo = Image.open('hotelcloud_logo.png')
     st.image(logo, width=300) 
-
-
 
 # Global date range selection (with British format display)
 # User input for date range
@@ -121,7 +120,8 @@ tab1, tab2, tab3 = st.tabs(["Pickup Data", "Forecasted Revenue Data", "Full Refu
 
 # Plot heatmaps in tabs
 with tab1:
-    year_selection = st.radio("Select Year", ["Current Year", "Previous Year"], key="pickup_year_selection")
+    year_selection = st.radio("Select Year", ["Current Year", "Previous Year"], key="pickup_year_selection", horizontal=True)
+    st.empty()  # Add an empty space to maintain layout
     if year_selection == "Current Year":
         fig = plot_heatmap_plotly(pickup_norm, 'Heatmap of Total Rooms', 'Total Rooms', start_date, end_date)
     else:
@@ -129,7 +129,8 @@ with tab1:
     st.plotly_chart(fig, use_container_width=True)
 
 with tab2:
-    year_selection = st.radio("Select Year", ["Current Year", "Previous Year"], key="bookings_year_selection")
+    year_selection = st.radio("Select Year", ["Current Year", "Previous Year"], key="bookings_year_selection", horizontal=True)
+    st.empty()  # Add an empty space to maintain layout
     if year_selection == "Current Year":
         fig = plot_heatmap_plotly(bookings_norm, 'Heatmap of Forecasted Revenue', 'Revenue', start_date, end_date)
     else:
@@ -137,7 +138,8 @@ with tab2:
     st.plotly_chart(fig, use_container_width=True)
 
 with tab3:
-    year_selection = st.radio("Select Year", ["Current Year", "Previous Year"], key="refundable_year_selection")
+    year_selection = st.radio("Select Year", ["Current Year", "Previous Year"], key="refundable_year_selection", horizontal=True)
+    st.empty()  # Add an empty space to maintain layout
     if year_selection == "Current Year":
         fig = plot_heatmap_plotly(full_refundable_norm, 'Heatmap of Refundable Rates', 'Refundable Rate', start_date, end_date)
     else:
